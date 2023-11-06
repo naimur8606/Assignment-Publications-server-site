@@ -25,7 +25,34 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const allAssignment = client.db("friendsCommunication").collection("assignments");
+
+    app.get("/assignments", async (req, res) => {
+      const cursor = allAssignment.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    app.post("/assignments", async (req, res) => {
+      const assignments = req.body;
+      const result = await allAssignment.insertOne(assignments);
+      console.log(result) 
+      res.send(result)
+    })
     
+    app.get("/assignments/:id", async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
+      const result = await allAssignment.findOne(query);
+      res.send(result)
+    })
+
+    app.delete('/assignments/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await allAssignment.deleteOne(query);
+      res.send(result);
+  })
 
 
 
