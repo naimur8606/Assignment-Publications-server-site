@@ -32,6 +32,12 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result)
     })
+    app.get("/assignments/manage-assignments/:email", async (req, res) => {
+      const email =req.params.email;
+      const query = {email: email};
+      const result = await allAssignment.find(query).toArray();
+      res.send(result)
+    })
 
     app.post("/assignments", async (req, res) => {
       const assignments = req.body;
