@@ -104,6 +104,11 @@ async function run() {
     res.send(result)
   })
 
+  app.get("/takeAssignments", async (req, res) => {
+    const cursor = allTakenAssignment.find();
+    const result = await cursor.toArray();
+    res.send(result)
+  })
 
 
     // Send a ping to confirm a successful connection
