@@ -32,18 +32,26 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result)
     })
+
     app.get("/assignments/my-assignments/:email", async (req, res) => {
       const email =req.params.email;
       const query = {email: email};
       const result = await allAssignment.find(query).toArray();
       res.send(result)
     })
+
     app.get("/assignments/manage-assignments/:email", async (req, res) => {
       const email =req.params.email;
       const query = {email: email, marks: "pending"};
       const result = await allAssignment.find(query).toArray();
       res.send(result)
     })
+
+    app.get("/assignments/update-assignments", async (req, res) => {
+      const query = { marks: { $ne: "pending" } };
+      const result = await allAssignment.find(query).toArray();
+      res.send(result);
+    });
 
     app.post("/assignments", async (req, res) => {
       const assignments = req.body;
@@ -57,6 +65,28 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await allAssignment.findOne(query);
       res.send(result)
+    })
+
+    app.patch('/assignments/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updatedAssignment = req.body;
+      const assignment = {
+        $set: {
+          title: updatedAssignment.title,
+          date: updatedAssignment.date,
+          level: updatedAssignment.level,
+          marks: updatedAssignment.marks,
+          pdf: updatedAssignment.pdf,
+          email: updatedAssignment.email,
+          photo: updatedAssignment.photo,
+          description: updatedAssignment.description
+        }
+      }
+
+      const result = await allAssignment.updateOne(filter, assignment, options);
+      res.send(result);
     })
 
     app.delete('/assignments/:id', async (req, res) => {
