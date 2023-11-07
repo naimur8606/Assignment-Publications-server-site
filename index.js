@@ -32,9 +32,15 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result)
     })
-    app.get("/assignments/manage-assignments/:email", async (req, res) => {
+    app.get("/assignments/my-assignments/:email", async (req, res) => {
       const email =req.params.email;
       const query = {email: email};
+      const result = await allAssignment.find(query).toArray();
+      res.send(result)
+    })
+    app.get("/assignments/manage-assignments/:email", async (req, res) => {
+      const email =req.params.email;
+      const query = {email: email, marks: "pending"};
       const result = await allAssignment.find(query).toArray();
       res.send(result)
     })
