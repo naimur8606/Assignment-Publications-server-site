@@ -26,6 +26,7 @@ async function run() {
     await client.connect();
 
     const allAssignment = client.db("friendsCommunication").collection("assignments");
+    const allTakenAssignment = client.db("friendsCommunication").collection("takeAssignments");
 
     app.get("/assignments", async (req, res) => {
       const cursor = allAssignment.find();
@@ -94,6 +95,13 @@ async function run() {
       const query = { _id: new ObjectId(id) }
       const result = await allAssignment.deleteOne(query);
       res.send(result);
+  })
+
+  app.post("/takeAssignments", async (req, res) => {
+    const takeAssignments = req.body;
+    const result = await allTakenAssignment.insertOne(takeAssignments);
+    console.log(result) 
+    res.send(result)
   })
 
 
