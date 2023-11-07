@@ -35,15 +35,15 @@ async function run() {
     })
 
     app.get("/assignments/my-assignments/:email", async (req, res) => {
-      const email =req.params.email;
-      const query = {email: email};
+      const email = req.params.email;
+      const query = { email: email };
       const result = await allAssignment.find(query).toArray();
       res.send(result)
     })
 
     app.get("/assignments/manage-assignments/:email", async (req, res) => {
-      const email =req.params.email;
-      const query = {email: email, marks: "pending"};
+      const email = req.params.email;
+      const query = { email: email, marks: "pending" };
       const result = await allAssignment.find(query).toArray();
       res.send(result)
     })
@@ -57,10 +57,10 @@ async function run() {
     app.post("/assignments", async (req, res) => {
       const assignments = req.body;
       const result = await allAssignment.insertOne(assignments);
-      console.log(result) 
+      console.log(result)
       res.send(result)
     })
-    
+
     app.get("/assignments/:id", async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) };
@@ -90,25 +90,53 @@ async function run() {
       res.send(result);
     })
 
-    app.delete('/assignments/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
-      const result = await allAssignment.deleteOne(query);
+    // app.delete('/assignments/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) }
+    //   const result = await allAssignment.deleteOne(query);
+    //   res.send(result);
+    // })
+
+    app.post("/takeAssignments", async (req, res) => {
+      const takeAssignments = req.body;
+      const result = await allTakenAssignment.insertOne(takeAssignments);
+      console.log(result)
+      res.send(result)
+    })
+
+    app.get("/takeAssignments", async (req, res) => {
+      const cursor = allTakenAssignment.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    app.get("/takeAssignments/pending", async (req, res) => {
+      const query = { marks: "pending" };
+      const result = await allTakenAssignment.find(query).toArray();
       res.send(result);
-  })
+    });
 
-  app.post("/takeAssignments", async (req, res) => {
-    const takeAssignments = req.body;
-    const result = await allTakenAssignment.insertOne(takeAssignments);
-    console.log(result) 
-    res.send(result)
-  })
+    app.patch('/takeAssignments/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updatedAssignment = req.body;
+      const assignment = {
+        $set: {
+          title: updatedAssignment.title,
+          note: updatedAssignment.note,
+          level: updatedAssignment.level,
+          marks: updatedAssignment.marks,
+          pdf: updatedAssignment.pdf,
+          email: updatedAssignment.email,
+          photo: updatedAssignment.photo,
+          achieveMarks: updatedAssignment.achieveMarks
+        }
+      }
 
-  app.get("/takeAssignments", async (req, res) => {
-    const cursor = allTakenAssignment.find();
-    const result = await cursor.toArray();
-    res.send(result)
-  })
+      const result = await allTakenAssignment.updateOne(filter, assignment, options);
+      res.send(result);
+    })
 
 
     // Send a ping to confirm a successful connection
