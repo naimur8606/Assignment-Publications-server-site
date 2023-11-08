@@ -39,7 +39,7 @@ const logger = (req, res, next) => {
 
 const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
-  console.log(token)
+  // console.log(token)
   if (!token) {
     return res.status(401).send({ message: 'unauthorized access' })
   }
@@ -211,6 +211,15 @@ async function run() {
       const result = await allTakenAssignment.find(query).toArray();
       res.send(result);
     });
+    app.get("/takeAssignmentsByUser", logger, verifyToken, async (req, res) => {
+      console.log(req.user.email , req.query.email)
+      if(req.user.email !== req.query.email){
+            return res.status(403).send({message: 'forbidden access'})
+        }
+      const query = { email: req.query.email };
+      const result = await allTakenAssignment.find(query).toArray();
+      res.send(result);
+    });
 
     app.get('/takeAssignments', logger, verifyToken, async (req, res) => {
       console.log(req.query.email);
@@ -227,8 +236,10 @@ async function run() {
     })
 
     app.patch('/takeAssignments/:id', async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) }
+      const id = req.params.id
+      const email = req.body.email;
+      const filter = { email: email, _id: new ObjectId(id) }
+      console.log(email, filter)
       const options = { upsert: true };
       const updatedAssignment = req.body;
       const assignment = {
