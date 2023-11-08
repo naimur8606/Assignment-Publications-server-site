@@ -9,9 +9,9 @@ const port = process.env.PORT || 5000;
 
 app.use(cors({
   origin: [
-    'http://localhost:5173',
+    // 'http://localhost:5173',
     'https://assignmentcommunication.web.app',
-    // 'https://cars-doctor-6c129.firebaseapp.com'
+    'https://assignmentcommunication.firebaseapp.com/'
   ],
   credentials: true
 }));
@@ -57,12 +57,14 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const allAssignment = client.db("friendsCommunication").collection("assignments");
     const allTakenAssignment = client.db("friendsCommunication").collection("takeAssignments");
     const allUsers = client.db('friendsCommunication').collection('user');
 
+
+  // Auth API
     app.post('/jwt', logger, async (req, res) => {
       const user = req.body;
       console.log('user for token', user);
@@ -83,7 +85,7 @@ async function run() {
     })
 
 
-
+  // api for assignments display
     app.get("/assignments", async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
@@ -95,11 +97,13 @@ async function run() {
       res.send(result);
     })
 
+  // api for Know assignments Number
     app.get('/assignmentsCount', async (req, res) => {
       const count = await allAssignment.estimatedDocumentCount();
       res.send({ count });
     })
 
+  // api for assignments shepard by user
     app.get("/assignments/my-assignments", logger, verifyToken, async (req, res) => {
       console.log(req.user.email , req.query.email)
       if(req.user.email !== req.query.email){
@@ -110,6 +114,7 @@ async function run() {
       res.send(result);
     }); 
 
+  // api for shepard User assignments Number
     app.get('/assignments/my-assignmentsCount', async (req, res) => {
       const query = { email: req.query.email };
       const result = await allAssignment.find(query).toArray();
@@ -117,6 +122,7 @@ async function run() {
       res.send({ count });
     })
 
+  // api for pending assignments
     app.get("/assignments/manage-assignments/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email, marks: "pending" };
@@ -124,12 +130,14 @@ async function run() {
       res.send(result)
     })
 
+  // api for not pending assignments
     app.get("/assignments/update-assignments", async (req, res) => {
       const query = { marks: { $ne: "pending" } };
       const result = await allAssignment.find(query).toArray();
       res.send(result);
     });
 
+  // api for post assignments
     app.post("/assignments", async (req, res) => {
       const assignments = req.body;
       const result = await allAssignment.insertOne(assignments);
@@ -137,6 +145,7 @@ async function run() {
       res.send(result)
     })
 
+  // api for sheared assignments display
     app.get("/assignments/:id", async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) };
@@ -144,6 +153,7 @@ async function run() {
       res.send(result)
     })
 
+  // api for sheared assignments update
     app.patch('/assignments/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) }
@@ -166,6 +176,7 @@ async function run() {
       res.send(result);
     })
 
+    // api for sheared assignments delete
     app.delete('/assignments/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
@@ -173,11 +184,13 @@ async function run() {
       res.send(result);
     })
 
+    // api for display users
     app.get('/user', async (req, res) => {
       const result = await allUsers.find().toArray();
       res.send(result);
     })
 
+  // api for post a user
     app.post('/user', async (req, res) => {
       const user = req.body;
       const email = user?.email;
@@ -189,6 +202,7 @@ async function run() {
       }
     });
 
+    // api for post taken assignments
     app.post("/takeAssignments", async (req, res) => {
       const takeAssignments = req.body;
       const result = await allTakenAssignment.insertOne(takeAssignments);
@@ -196,12 +210,14 @@ async function run() {
       res.send(result)
     })
 
+    // api for all taken assignments display
     app.get("/allTakeAssignments", async (req, res) => {
       const cursor = allTakenAssignment.find();
       const result = await cursor.toArray();
       res.send(result)
     })
 
+    // api for all taken assignments display which marks are pending
     app.get("/takeAssignments/pending", logger, verifyToken, async (req, res) => {
       console.log(req.user.email , req.query.email)
       if(req.user.email !== req.query.email){
@@ -211,6 +227,8 @@ async function run() {
       const result = await allTakenAssignment.find(query).toArray();
       res.send(result);
     });
+
+  // api for shepard taken assignments by user
     app.get("/takeAssignmentsByUser", logger, verifyToken, async (req, res) => {
       console.log(req.user.email , req.query.email)
       if(req.user.email !== req.query.email){
@@ -221,6 +239,7 @@ async function run() {
       res.send(result);
     });
 
+     // api for taken assignments display by verified
     app.get('/takeAssignments', logger, verifyToken, async (req, res) => {
       console.log(req.query.email);
       console.log('token owner info', req.user)
@@ -235,6 +254,7 @@ async function run() {
       res.send(result);
     })
 
+  // api for Update taken assignments marks
     app.patch('/takeAssignments/:id', async (req, res) => {
       const id = req.params.id
       const email = req.body.email;
@@ -261,8 +281,8 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
